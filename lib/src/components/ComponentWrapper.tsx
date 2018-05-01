@@ -4,7 +4,8 @@ import * as ReactLifecyclesCompat from 'react-lifecycles-compat';
 
 export class ComponentWrapper {
 
-  static wrap(componentName: string, OriginalComponentClass: React.ComponentType<any>, store): React.ComponentType<any> {
+  static wrap(componentName: string, OriginalComponentClass: React.ComponentType<any>, store,
+              reduxStore?: object, ReduxProvider?: React.ComponentType<any>, reduxOptions?: object): React.ComponentType<any> {
 
     class WrappedComponent extends React.Component<any, { componentId: string; allProps: {}; }> {
 
@@ -53,7 +54,7 @@ export class ComponentWrapper {
       }
 
       render() {
-        return (
+        const ComponentWrapped = (
           <OriginalComponentClass
             ref={this._saveComponentRef}
             {...this.state.allProps}
@@ -61,6 +62,16 @@ export class ComponentWrapper {
             key={this.state.componentId}
           />
         );
+
+        if (reduxStore && ReduxProvider) {
+          return (
+            <ReduxProvider store={reduxStore} {...reduxOptions}>
+              {WrappedComponent}
+            </ReduxProvider>
+          );
+        } else {
+          return WrappedComponent;
+        }
       }
 
       private _assertComponentId() {
@@ -70,7 +81,11 @@ export class ComponentWrapper {
       }
 
       private _saveComponentRef(r) {
-        this.originalComponentRef = r;
+        if (reduxStore && ReduxProvider && r.getWrappedInstance) {
+          this.originalComponentRef = r.getWrappedInstance();
+        } else {
+          this.originalComponentRef = r;
+        }
       }
     }
 

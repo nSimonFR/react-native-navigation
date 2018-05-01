@@ -8,10 +8,11 @@ export class ComponentRegistry {
     this.store = store;
   }
 
-  registerComponent(componentName: string, getComponentClassFunc: ComponentProvider): void {
+  registerComponent(componentName: string, getComponentClassFunc: ComponentProvider, reduxStore?: object, ReduxProvider?: React.ComponentType<any>, reduxOptions?: object): void {
     const OriginalComponentClass = getComponentClassFunc();
-    const NavigationComponent = ComponentWrapper.wrap(componentName, OriginalComponentClass, this.store);
+    const NavigationComponent = ComponentWrapper.wrap(componentName, OriginalComponentClass, this.store, reduxStore, ReduxProvider, reduxOptions);
     this.store.setOriginalComponentClassForName(componentName, OriginalComponentClass);
     AppRegistry.registerComponent(componentName, () => NavigationComponent);
   }
+
 }
